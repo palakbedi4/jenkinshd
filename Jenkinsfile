@@ -67,23 +67,22 @@ pipeline {
             }
         }
         stage('Monitor with Datadog') {
-            steps {
-                echo 'Monitoring application in production...'
-                sh '''
-                # Send custom metrics to Datadog
-                curl -X POST -H "Content-type: application/json" \
-                -d '{
-                     "series" : [{
-                         "metric":"myapp.deployment",
-                         "points":[[ $(date +%s), 1 ]],
-                         "type":"count",
-                         "tags":["env:production"]
-                      }]
-                    }' \
-                'https://api.datadoghq.com/api/v1/series?api_key=ea0f57a0c8592dfa68304fdaa53ee3b1 '
-                '''
-            }
+    steps {
+        echo 'Monitoring application in production...'
+        sh '''
+        curl -X POST -H "Content-type: application/json" \
+        -d '{
+             "series" : [{
+                 "metric":"myapp.deployment",
+                 "points":[[ $(date +%s), 1 ]],
+                 "type":"count",
+                 "tags":["env:production"]
+              }]
+           }' \
+        "https://api.datadoghq.com/api/v1/series?api_key=ea0f57a0c8592dfa68304fdaa53ee3b1"
+        '''
     }
+}
     
         stage('Release to Production') {   // This is your release stage
             steps {
