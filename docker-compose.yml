@@ -1,10 +1,9 @@
-version: '3'
 services:
   web:
     image: react-app-image
     build: .
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       NODE_ENV: production
-  # You can define more services like database, cache, etc.
+    platform: linux/amd64   # Specify the platform
