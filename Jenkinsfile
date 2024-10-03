@@ -5,6 +5,9 @@ pipeline {
         DOCKER_IMAGE = 'react-app-image'
         NETLIFY_AUTH_TOKEN = credentials('nfp_LwS7bbdd2oR3KRDbjXiBkaZFdCordmcg639c')
         NETLIFY_SITE_ID = '023ed5da-c7ca-4f9e-b163-aa582332b436'
+        SONAR_PROJECT_KEY = 'palakbedi4_jenkinshd'  // Get this from SonarCloud
+        SONAR_ORG = 'SonarCloud'         // Your organization name in SonarCloud
+        SONAR_TOKEN = credentials('60fc6b737fd3aa26913cf111871398da1dcb578a ')      // Store the token in Jenkins credentials
 
     }
 
@@ -27,6 +30,20 @@ pipeline {
             steps {
                 echo 'Building Docker Image...'
                 sh 'docker build -t $DOCKER_IMAGE .'
+            }
+        }
+        stage('Run SonarCloud Analysis') {
+            steps {
+                withSonarQubeEnv('SonarCloud') {
+                    sh """
+                    sonar-scanner \
+                    -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+                    -Dsonar.organization=$SONAR_ORG \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=https://sonarcloud.io \
+                    -Dsonar.login=$SONAR_TOKEN
+                    """
+                }
             }
         }
 
