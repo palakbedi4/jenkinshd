@@ -65,6 +65,14 @@ pipeline {
                 '''
             }
         }
+        stage('Release to Production') {   // This is your release stage
+            steps {
+                script {
+                    echo 'Releasing application using Docker Compose...'
+                    sh 'docker-compose up -d --build'  // Rebuild and release services
+                }
+            }
+        }
     }
 
     post {
