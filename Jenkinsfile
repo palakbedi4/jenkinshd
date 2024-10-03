@@ -5,6 +5,7 @@ pipeline {
         DOCKER_IMAGE = 'react-app-image'
         NETLIFY_AUTH_TOKEN = credentials('nfp_LwS7bbdd2oR3KRDbjXiBkaZFdCordmcg639c')
         NETLIFY_SITE_ID = '023ed5da-c7ca-4f9e-b163-aa582332b436'
+
     }
 
     stages {
@@ -65,6 +66,25 @@ pipeline {
                 '''
             }
         }
+        stage('Monitor with Datadog') {
+            steps {
+                echo 'Monitoring application in production...'
+                sh '''
+                # Send custom metrics to Datadog
+                curl -X POST -H "Content-type: application/json" \
+                -d '{
+                     "series" : [{
+                         "metric":"myapp.deployment",
+                         "points":[[ $(date +%s), 1 ]],
+                         "type":"count",
+                         "tags":["env:production"]
+                      }]
+                    }' \
+                'https://api.datadoghq.com/api/v1/series?api_key=ea0f57a0c8592dfa68304fdaa53ee3b1 '
+                '''
+            }
+    }
+    
         stage('Release to Production') {   // This is your release stage
             steps {
                 script {
@@ -72,25 +92,9 @@ pipeline {
                     sh 'docker-compose up -d --build'  // Rebuild and release services
                 }
             }
-            stage('Monitor with Datadog') {
-            steps {
-                echo 'Sending metrics to Datadog...'
-                sh '''
-                curl -X POST -H "Content-type: application/json" \
-                -d '{
-                     "series" :[{
-                         "metric":"app.deployment.status",
-                         "points":[[ $(date +%s), 1 ]],
-                         "type":"gauge",
-                         "host":"production-server",
-                         "tags":["env:production","app:my-app"]
-                     }]
-                }' \
-                "https://api.datadoghq.com/api/v1/series?api_key=$DATADOG_API_KEY"
-                '''
-            }
         }
     }
+
     
 
             
