@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'react-app-image'
+        NETLIFY_AUTH_TOKEN = credentials('nfp_LwS7bbdd2oR3KRDbjXiBkaZFdCordmcg639c') 
+        NETLIFY_SITE_ID = '023ed5da-c7ca-4f9e-b163-aa582332b436'
     }
 
     stages {
@@ -40,19 +42,29 @@ pipeline {
         stage('Run Selenium Tests') {
             steps {
                 echo 'Running Selenium tests...'
-                // Assuming you have Selenium tests configured
-                // Adjust the path to your tests as necessary
-                sh 'npm run test'
+                sh 'npm run test' 
+            }
+        }
+
+        stage('Deploy to Netlify') {
+            steps {
+                echo 'Deploying to Netlify...'
+                sh '''
+                netlify deploy --prod \
+                --auth $NETLIFY_AUTH_TOKEN \
+                --site $NETLIFY_SITE_ID \
+                --dir ./build
+                '''
             }
         }
     }
 
     post {
         success {
-            echo 'Build and tests ran successfully!'
+            echo 'Build, tests, and deployment ran successfully!'
         }
         failure {
-            echo 'Build or tests failed!'
+            echo 'Build, tests, or deployment failed!'
             script {
                 // Optional: capture logs from the Docker container on failure
                 sh 'docker logs react-app-container || true'
