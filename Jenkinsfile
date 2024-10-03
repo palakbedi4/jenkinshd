@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'react-app-image'
-        NETLIFY_AUTH_TOKEN = credentials('nfp_LwS7bbdd2oR3KRDbjXiBkaZFdCordmcg639c') 
+        NETLIFY_AUTH_TOKEN = credentials('nfp_LwS7bbdd2oR3KRDbjXiBkaZFdCordmcg639c')
         NETLIFY_SITE_ID = '023ed5da-c7ca-4f9e-b163-aa582332b436'
     }
 
@@ -42,7 +42,15 @@ pipeline {
         stage('Run Selenium Tests') {
             steps {
                 echo 'Running Selenium tests...'
-                sh 'npm run test' 
+                sh 'npm run test'  // Adjust the path to your tests as necessary
+            }
+        }
+
+        // Add the missing build step
+        stage('Build React App') {
+            steps {
+                echo 'Building React App for production...'
+                sh 'npm run build' // This will generate the ./build directory
             }
         }
 
