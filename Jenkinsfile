@@ -72,8 +72,30 @@ pipeline {
                     sh 'docker-compose up -d --build'  // Rebuild and release services
                 }
             }
+            stage('Monitor with Datadog') {
+            steps {
+                echo 'Sending metrics to Datadog...'
+                sh '''
+                curl -X POST -H "Content-type: application/json" \
+                -d '{
+                     "series" :[{
+                         "metric":"app.deployment.status",
+                         "points":[[ $(date +%s), 1 ]],
+                         "type":"gauge",
+                         "host":"production-server",
+                         "tags":["env:production","app:my-app"]
+                     }]
+                }' \
+                "https://api.datadoghq.com/api/v1/series?api_key=$DATADOG_API_KEY"
+                '''
+            }
         }
     }
+    
+
+            
+        
+    
 
     post {
         success {
