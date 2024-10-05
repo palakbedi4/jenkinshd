@@ -38,8 +38,9 @@ pipeline {
                     sonar-scanner \
                     -Dsonar.projectKey=hdtask \
                     -Dsonar.sources=./src \
-                    -Dsonar.host.url=http://localhost:9001 \
+                    -Dsonar.host.url=http://localhost:9000 \
                     -Dsonar.login=sqp_af50e9436f30deb572660f399485dbf55577d858
+                    -X
                     '''
                 }
             }
