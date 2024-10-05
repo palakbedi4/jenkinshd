@@ -29,6 +29,12 @@ pipeline {
             }
         }
 
+        stage('Security Scan') {
+            steps {
+                echo 'Simulating Security Scan (No actual scan performed)...'
+            }
+        }
+
         stage('Run App in Docker') {
             steps {
                 script {
