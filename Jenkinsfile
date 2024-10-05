@@ -56,9 +56,16 @@ pipeline {
             }
         }
          stage('SonarQube Analysis') {
-            def scannerHome = tool 'SonarScanner';
-            withSonarQubeEnv() {
-            sh "${scannerHome}/bin/sonar-scanner"
+            steps {
+                script {
+                    withSonarQubeEnv('SonarQube') { // 'SonarQube' should match the SonarQube server configured in Jenkins
+                        sh 'sonar-scanner \
+                            -Dsonar.projectKey=my_project_key \
+                            -Dsonar.sources=src/ \
+                            -Dsonar.host.url=http://localhost:9000 \
+                            -Dsonar.login=$SONAR_TOKEN'
+                    }
+                }
             }
         }
 
