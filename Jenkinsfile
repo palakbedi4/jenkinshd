@@ -5,7 +5,7 @@ pipeline {
         DOCKER_IMAGE = 'react-app-image'
         NETLIFY_AUTH_TOKEN = credentials('nfp_LwS7bbdd2oR3KRDbjXiBkaZFdCordmcg639c')
         NETLIFY_SITE_ID = '023ed5da-c7ca-4f9e-b163-aa582332b436'
-        SONAR_PROJECT_KEY = 'hdtask'   // Define the project key here
+        SONAR_PROJECT_KEY = 'jenkins'   // Define the project key here
         SONAR_TOKEN = credentials('sonar_token')
     }
 
@@ -30,10 +30,17 @@ pipeline {
                 sh 'docker build -t $DOCKER_IMAGE .'
             }
         }
-        stage('Scan') {
+        stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv(installationName: 'SonarQube') {
-                    sh ' ./mnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar'
+                echo 'Running SonarQube analysis using sonar-scanner...'
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                    sonar-scanner \
+                    -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+                    -Dsonar.sources=./src \
+                    -Dsonar.host.url=http://localhost:9001 \
+                    -Dsonar.login=$SONAR_TOKEN
+                    """
                 }
             }
         }
