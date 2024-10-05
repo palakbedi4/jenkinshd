@@ -5,7 +5,8 @@ pipeline {
         DOCKER_IMAGE = 'react-app-image'
         NETLIFY_AUTH_TOKEN = credentials('nfp_LwS7bbdd2oR3KRDbjXiBkaZFdCordmcg639c')
         NETLIFY_SITE_ID = '023ed5da-c7ca-4f9e-b163-aa582332b436'
-        
+        SONAR_PROJECT_KEY = 'hdtask'   // Define the project key here
+        SONARQUBE_ENV = 'SonarQube"
     }
 
     stages {
@@ -27,6 +28,20 @@ pipeline {
             steps {
                 echo 'Building Docker Image...'
                 sh 'docker build -t $DOCKER_IMAGE .'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                echo 'Running SonarQube analysis...'
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                    sonar-scanner \
+                    -Dsonar.projectKey=hdtask \
+                    -Dsonar.sources=./src \
+                    -Dsonar.host.url=http://localhost:9001 \
+                    -Dsonar.login=sqp_af50e9436f30deb572660f399485dbf55577d858
+                    '''
+                }
             }
         }
 
