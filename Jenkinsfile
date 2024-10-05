@@ -55,6 +55,12 @@ pipeline {
                 sh 'npm run build' // This will generate the ./build directory
             }
         }
+         stage('SonarQube Analysis') {
+            def scannerHome = tool 'SonarScanner';
+            withSonarQubeEnv() {
+            sh "${scannerHome}/bin/sonar-scanner"
+            }
+        }
 
         stage('Deploy to Netlify') {
             steps {
