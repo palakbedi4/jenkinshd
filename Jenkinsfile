@@ -62,8 +62,8 @@ pipeline {
                         sh 'sonar-scanner \
                             -Dsonar.projectKey=my_project_key \
                             -Dsonar.sources=src/ \
-                            -Dsonar.host.url=http://localhost:9000 \
-                            -Dsonar.login=$SONAR_TOKEN'
+                            -Dsonar.host.url=http://localhost:9001 \
+                            -Dsonar.login=sqp_af50e9436f30deb572660f399485dbf55577d858'
                     }
                 }
             }
