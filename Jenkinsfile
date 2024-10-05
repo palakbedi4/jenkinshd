@@ -91,14 +91,17 @@ pipeline {
                 }
             }
         }
+
+        stage('Mail Notification') {
+            steps {
+                mail to: 'palakbedi2004@gmail.com',
+                     subject: "Build Successful: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                     body: "Good news! The build for project ${env.JOB_NAME} [${env.BUILD_NUMBER}] completed successfully."
+            }
+        }
     }
 
     post {
-        success {
-            mail to: 'palakbedi2004@gmail.com',
-                 subject: "Build Successful: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
-                 body: "Good news! The build for project ${env.JOB_NAME} [${env.BUILD_NUMBER}] completed successfully."
-        }
         failure {
             echo 'Build, tests, or deployment failed!'
             script {
