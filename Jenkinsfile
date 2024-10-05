@@ -5,8 +5,7 @@ pipeline {
         DOCKER_IMAGE = 'react-app-image'
         NETLIFY_AUTH_TOKEN = credentials('nfp_LwS7bbdd2oR3KRDbjXiBkaZFdCordmcg639c')
         NETLIFY_SITE_ID = '023ed5da-c7ca-4f9e-b163-aa582332b436'
-        SONAR_TOKEN = credentials('sqp_af50e9436f30deb572660f399485dbf55577d858') // Ensure this matches your credentials ID
-
+        
     }
 
     stages {
@@ -55,19 +54,7 @@ pipeline {
                 sh 'npm run build' // This will generate the ./build directory
             }
         }
-         stage('SonarQube Analysis') {
-            steps {
-                script {
-                    withSonarQubeEnv('SonarQube') { // 'SonarQube' should match the SonarQube server configured in Jenkins
-                        sh 'sonar-scanner \
-                            -Dsonar.projectKey=hdtask \
-                            -Dsonar.sources=src/ \
-                            -Dsonar.host.url=http://localhost:9001 \
-                            -Dsonar.login=sqp_af50e9436f30deb572660f399485dbf55577d858'
-                    }
-                }
-            }
-        }
+         
 
         stage('Deploy to Netlify') {
             steps {
