@@ -5,8 +5,6 @@ pipeline {
         DOCKER_IMAGE = 'react-app-image'
         NETLIFY_AUTH_TOKEN = credentials('nfp_LwS7bbdd2oR3KRDbjXiBkaZFdCordmcg639c')
         NETLIFY_SITE_ID = '023ed5da-c7ca-4f9e-b163-aa582332b436'
-        SONAR_PROJECT_KEY = 'jenkins'   // Define the project key here
-        SONAR_TOKEN = credentials('sonar_token')
     }
 
     stages {
@@ -30,20 +28,6 @@ pipeline {
                 sh 'docker build -t $DOCKER_IMAGE .'
             }
         }
-        stage('SonarQube Analysis') {
-            steps {
-                echo 'Running SonarQube analysis using sonar-scanner...'
-                withSonarQubeEnv('SonarQube') {
-                    sh """
-                    sonar-scanner \
-                    -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-                    -Dsonar.sources=./src \
-                    -Dsonar.host.url=http://localhost:9001 \
-                    -Dsonar.login=$SONAR_TOKEN
-                    """
-                }
-            }
-        }
 
         stage('Run App in Docker') {
             steps {
@@ -62,14 +46,12 @@ pipeline {
             }
         }
 
-        // Add the missing build step
         stage('Build React App') {
             steps {
                 echo 'Building React App for production...'
                 sh 'npm run build' // This will generate the ./build directory
             }
         }
-         
 
         stage('Deploy to Netlify') {
             steps {
@@ -82,25 +64,26 @@ pipeline {
                 '''
             }
         }
+
         stage('Monitor with Datadog') {
-    steps {
-        echo 'Monitoring application in production...'
-        sh '''
-        curl -X POST -H "Content-type: application/json" \
-        -d '{
-             "series" : [{
-                 "metric":"myapp.deployment",
-                 "points":[[ $(date +%s), 1 ]],
-                 "type":"count",
-                 "tags":["env:production"]
-              }]
-           }' \
-        "https://api.datadoghq.com/api/v1/series?api_key=ea0f57a0c8592dfa68304fdaa53ee3b1"
-        '''
-    }
-}
-    
-        stage('Release to Production') {   // This is your release stage
+            steps {
+                echo 'Monitoring application in production...'
+                sh '''
+                curl -X POST -H "Content-type: application/json" \
+                -d '{
+                     "series" : [{
+                         "metric":"myapp.deployment",
+                         "points":[[ $(date +%s), 1 ]],
+                         "type":"count",
+                         "tags":["env:production"]
+                      }]
+                   }' \
+                "https://api.datadoghq.com/api/v1/series?api_key=ea0f57a0c8592dfa68304fdaa53ee3b1"
+                '''
+            }
+        }
+
+        stage('Release to Production') {  
             steps {
                 script {
                     echo 'Releasing application using Docker Compose...'
@@ -110,22 +93,20 @@ pipeline {
         }
     }
 
-    
-
-            
-        
-    
-
     post {
         success {
-            echo 'Build, tests, and deployment ran successfully!'
+            mail to: 'palakbedi2004@gmail.com',
+                 subject: "Build Successful: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                 body: "Good news! The build for project ${env.JOB_NAME} [${env.BUILD_NUMBER}] completed successfully."
         }
         failure {
             echo 'Build, tests, or deployment failed!'
             script {
-                // Optional: capture logs from the Docker container on failure
                 sh 'docker logs react-app-container || true'
             }
+            mail to: 'palakbedi2004@gmail.com',
+                 subject: "Build Failed: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                 body: "The build for project ${env.JOB_NAME} [${env.BUILD_NUMBER}] has failed. Please check the logs."
         }
     }
 }
